@@ -575,10 +575,10 @@ function buildChatModelOptions(
   }
 
   if (currentOverride) {
-    addOption(currentOverride);
+    addOption(currentOverride, formatChatModelDisplay(currentOverride, catalog));
   }
   if (defaultModel) {
-    addOption(defaultModel);
+    addOption(defaultModel, formatChatModelDisplay(defaultModel, catalog));
   }
   return options;
 }
@@ -586,12 +586,9 @@ function buildChatModelOptions(
 function renderChatModelSelect(state: AppViewState) {
   const currentOverride = resolveModelOverrideValue(state);
   const defaultModel = resolveDefaultModelValue(state);
-  const options = buildChatModelOptions(
-    state.chatModelCatalog ?? [],
-    currentOverride,
-    defaultModel,
-  );
-  const defaultDisplay = formatChatModelDisplay(defaultModel);
+  const catalog = state.chatModelCatalog ?? [];
+  const options = buildChatModelOptions(catalog, currentOverride, defaultModel);
+  const defaultDisplay = formatChatModelDisplay(defaultModel, catalog);
   const defaultLabel = defaultModel ? `Default (${defaultDisplay})` : "Default model";
   const busy =
     state.chatLoading || state.chatSending || Boolean(state.chatRunId) || state.chatStream !== null;

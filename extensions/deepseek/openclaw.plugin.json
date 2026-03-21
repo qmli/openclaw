@@ -1,0 +1,12 @@
+{
+  "id": "deepseek",
+  "providers": ["deepseek"],
+  "providerAuthEnvVars": {
+    "deepseek": ["DEEPSEEK_API_KEY"]
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}

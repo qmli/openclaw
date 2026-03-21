@@ -1,0 +1,133 @@
+{
+  // Server / CLI debugging:
+  // 1) Run `pnpm build` so `dist/entry.js` + `dist/entry.js.map` exist (source maps map breakpoints to `src/`).
+  // 2) Default builds emit source maps; set OPENCLAW_SOURCEMAP=0 to disable.
+  // 3) `pnpm dev` / run-node spawns a child `openclaw.mjs` — use "gateway (run-node)" or enable auto-attach below.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "OpenClaw: CLI (openclaw.mjs)",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/openclaw.mjs",
+      "args": ["--help"],
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js", "${workspaceFolder}/dist/**/*.mjs"],
+      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
+      "env": {
+        "OPENCLAW_NO_RESPAWN": "1"
+      }
+    },
+    {
+      "name": "OpenClaw: gateway dev",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/openclaw.mjs",
+      "args": ["--dev", "gateway", "--token", "dev-token-123"],
+      "env": {
+        "OPENCLAW_SKIP_CHANNELS": "1",
+        "CLAWDBOT_SKIP_CHANNELS": "1",
+        "OPENCLAW_NO_RESPAWN": "1"
+      },
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js", "${workspaceFolder}/dist/**/*.mjs"],
+      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"]
+    },
+    {
+      "name": "OpenClaw: gateway (run-node, matches pnpm dev)",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/scripts/run-node.mjs",
+      "args": ["--dev", "gateway", "--token", "dev-token-123"],
+      "env": {
+        "OPENCLAW_SKIP_CHANNELS": "1",
+        "CLAWDBOT_SKIP_CHANNELS": "1",
+        "OPENCLAW_NO_RESPAWN": "1"
+      },
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js", "${workspaceFolder}/dist/**/*.mjs"],
+      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
+      "autoAttachChildProcesses": true
+    },
+    {
+      "name": "OpenClaw: gateway (watch-node, matches gateway:watch)",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/scripts/watch-node.mjs",
+      "args": ["gateway", "--force", "--token", "dev-token-123"],
+      "env": {
+        "OPENCLAW_SKIP_CHANNELS": "1",
+        "CLAWDBOT_SKIP_CHANNELS": "1",
+        "OPENCLAW_NO_RESPAWN": "1"
+      },
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js", "${workspaceFolder}/dist/**/*.mjs"],
+      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
+      "autoAttachChildProcesses": true
+    },
+    {
+      "name": "OpenClaw: run-node (dev runner)",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/scripts/run-node.mjs",
+      "args": [],
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js", "${workspaceFolder}/dist/**/*.mjs"],
+      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
+      "autoAttachChildProcesses": true,
+      "env": {
+        "OPENCLAW_NO_RESPAWN": "1"
+      }
+    },
+    {
+      "name": "Vitest: current file",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "${workspaceFolder}/node_modules/vitest/vitest.mjs",
+        "run",
+        "${relativeFile}",
+        "--inspectBrk",
+        "--no-file-parallelism",
+        "--maxWorkers",
+        "1"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"],
+      "autoAttachChildProcesses": true
+    },
+    {
+      "name": "Debug TS/TSX: current file (tsx)",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["--import", "tsx"],
+      "args": ["${file}"],
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Attach to Node (port 9229)",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+      "skipFiles": ["<node_internals>/**"],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js", "${workspaceFolder}/dist/**/*.mjs"],
+      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"]
+    }
+  ]
+}

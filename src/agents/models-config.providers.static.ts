@@ -222,6 +222,17 @@ const MODELSTUDIO_MODEL_CATALOG: ReadonlyArray<ProviderModelConfig> = [
   },
 ];
 
+/** OpenAI-compatible API; model IDs are from https://api-docs.deepseek.com/ */
+const DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1";
+const DEEPSEEK_DEFAULT_CONTEXT_WINDOW = 131072;
+const DEEPSEEK_DEFAULT_MAX_TOKENS = 8192;
+const DEEPSEEK_DEFAULT_COST = {
+  input: 0,
+  output: 0,
+  cacheRead: 0,
+  cacheWrite: 0,
+};
+
 const NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1";
 const NVIDIA_DEFAULT_MODEL_ID = "nvidia/llama-3.1-nemotron-70b-instruct";
 const NVIDIA_DEFAULT_CONTEXT_WINDOW = 131072;
@@ -470,7 +481,7 @@ export function buildQianfanProvider(): ProviderConfig {
     models: [
       {
         id: QIANFAN_DEFAULT_MODEL_ID,
-        name: "DEEPSEEK V3.2",
+        name: "DEEPSEEK V3.24444444444444444",
         reasoning: true,
         input: ["text"],
         cost: QIANFAN_DEFAULT_COST,
@@ -495,6 +506,33 @@ export function buildModelStudioProvider(): ProviderConfig {
     baseUrl: MODELSTUDIO_BASE_URL,
     api: "openai-completions",
     models: MODELSTUDIO_MODEL_CATALOG.map((model) => ({ ...model })),
+  };
+}
+
+export function buildDeepseekProvider(): ProviderConfig {
+  return {
+    baseUrl: DEEPSEEK_BASE_URL,
+    api: "openai-completions",
+    models: [
+      {
+        id: "deepseek-chat",
+        name: "DeepSeek Chat",
+        reasoning: false,
+        input: ["text"],
+        cost: DEEPSEEK_DEFAULT_COST,
+        contextWindow: DEEPSEEK_DEFAULT_CONTEXT_WINDOW,
+        maxTokens: DEEPSEEK_DEFAULT_MAX_TOKENS,
+      },
+      {
+        id: "deepseek-reasoner",
+        name: "DeepSeek Reasoner",
+        reasoning: true,
+        input: ["text"],
+        cost: DEEPSEEK_DEFAULT_COST,
+        contextWindow: DEEPSEEK_DEFAULT_CONTEXT_WINDOW,
+        maxTokens: DEEPSEEK_DEFAULT_MAX_TOKENS,
+      },
+    ],
   };
 }
 

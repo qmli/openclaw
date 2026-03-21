@@ -12,6 +12,7 @@ import {
   XIAOMI_DEFAULT_MODEL_ID,
 } from "./models-config.providers.static.js";
 export {
+  buildDeepseekProvider,
   buildKimiCodingProvider,
   buildKilocodeProvider,
   buildNvidiaProvider,

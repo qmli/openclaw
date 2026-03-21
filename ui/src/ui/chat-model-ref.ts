@@ -72,10 +72,39 @@ export function resolveServerChatModelValue(
   return buildQualifiedChatModelValue(model, provider);
 }
 
-export function formatChatModelDisplay(value: string): string {
+function findCatalogEntryForQualifiedValue(
+  value: string,
+  catalog: ModelCatalogEntry[],
+): ModelCatalogEntry | undefined {
+  const key = value.trim().toLowerCase();
+  if (!key) {
+    return undefined;
+  }
+  for (const entry of catalog) {
+    const qualified = buildQualifiedChatModelValue(entry.id, entry.provider);
+    if (qualified.toLowerCase() === key) {
+      return entry;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Human-readable label for a qualified model ref (`provider/modelId` or bare id).
+ * When `catalog` is provided and lists a matching entry with a non-empty `name`, that name is shown instead of the raw model id.
+ */
+export function formatChatModelDisplay(value: string, catalog?: ModelCatalogEntry[]): string {
   const trimmed = value.trim();
   if (!trimmed) {
     return "";
+  }
+  if (catalog && catalog.length > 0) {
+    const entry = findCatalogEntryForQualifiedValue(trimmed, catalog);
+    const friendly = entry?.name?.trim();
+    if (entry && friendly) {
+      const provider = entry.provider?.trim();
+      return provider ? `${friendly} · ${provider}` : friendly;
+    }
   }
   const separator = trimmed.indexOf("/");
   if (separator <= 0) {
@@ -86,8 +115,9 @@ export function formatChatModelDisplay(value: string): string {
 
 export function buildChatModelOption(entry: ModelCatalogEntry): { value: string; label: string } {
   const provider = entry.provider?.trim();
+  const displayId = entry.name?.trim() || entry.id;
   return {
     value: buildQualifiedChatModelValue(entry.id, provider),
-    label: provider ? `${entry.id} · ${provider}` : entry.id,
+    label: provider ? `${displayId} · ${provider}` : displayId,
   };
 }

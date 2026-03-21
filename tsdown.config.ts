@@ -55,6 +55,9 @@ function nodeBuildConfig(config: Record<string, unknown>) {
     env,
     fixedExtension: false,
     platform: "node",
+    // Enable source maps so VS Code / Chrome can debug `src/**` against bundled `dist/**`.
+    // Disable with OPENCLAW_SOURCEMAP=0 when you need a smaller dist (e.g. release tarball checks).
+    sourcemap: process.env.OPENCLAW_SOURCEMAP === "0" ? false : true,
     inputOptions: buildInputOptions,
   };
 }
