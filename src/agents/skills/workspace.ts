@@ -34,14 +34,11 @@ const skillsLogger = createSubsystemLogger("skills");
 const skillCommandDebugOnce = new Set<string>();
 
 /**
- * Replace the user's home directory prefix with `~` in skill file paths
- * to reduce system prompt token usage. Models understand `~` expansion,
- * and the read tool resolves `~` to the home directory.
+ * 将技能文件路径中的用户主目录前缀压缩为 `~`，减少提示词 token 消耗。
+ * 模型可以理解 `~`，读取工具也会将其解析为真实主目录。
  *
- * Example: `/Users/alice/.bun/.../skills/github/SKILL.md`
- *       → `~/.bun/.../skills/github/SKILL.md`
- *
- * Saves ~5–6 tokens per skill path × N skills ≈ 400–600 tokens total.
+ * 例：`/Users/alice/.bun/.../skills/github/SKILL.md`
+ *   -> `~/.bun/.../skills/github/SKILL.md`
  */
 function compactSkillPaths(skills: Skill[]): Skill[] {
   const home = os.homedir();
@@ -72,7 +69,7 @@ function filterSkillEntries(
   eligibility?: SkillEligibilityContext,
 ): SkillEntry[] {
   let filtered = entries.filter((entry) => shouldIncludeSkill({ entry, config, eligibility }));
-  // If skillFilter is provided, only include skills in the filter list.
+  // 提供 skillFilter 时，仅保留白名单内的技能。
   if (skillFilter !== undefined) {
     const normalized = normalizeSkillFilter(skillFilter) ?? [];
     const label = normalized.length > 0 ? normalized.join(", ") : "(none)";
@@ -90,7 +87,7 @@ function filterSkillEntries(
 
 const SKILL_COMMAND_MAX_LENGTH = 32;
 const SKILL_COMMAND_FALLBACK = "skill";
-// Discord command descriptions must be ≤100 characters
+// Discord 命令描述限制为最多 100 个字符。
 const SKILL_COMMAND_DESCRIPTION_MAX_LENGTH = 100;
 
 const DEFAULT_MAX_CANDIDATES_PER_ROOT = 300;
@@ -261,8 +258,8 @@ function resolveNestedSkillsRoot(
     return { baseDir: dir };
   }
 
-  // Heuristic: if `dir/skills/*/SKILL.md` exists for any entry, treat `dir/skills` as the real root.
-  // Note: don't stop at 25, but keep a cap to avoid pathological scans.
+  // 启发式：若存在 `dir/skills/*/SKILL.md`，则把 `dir/skills` 视为真实技能根目录。
+  // 同时保留扫描上限，避免在异常大目录中产生高开销。
   const nestedDirs = listChildDirectories(nested);
   const scanLimit = Math.max(0, opts?.maxEntriesToScan ?? 100);
   const toScan = scanLimit === 0 ? [] : nestedDirs.slice(0, Math.min(nestedDirs.length, scanLimit));
@@ -316,7 +313,7 @@ function loadSkillEntries(
       return [];
     }
 
-    // If the root itself is a skill directory, just load it directly (but enforce size cap).
+    // 根目录本身若就是技能目录，则直接加载；但仍要执行文件大小上限检查。
     const rootSkillMd = path.join(baseDir, "SKILL.md");
     if (fs.existsSync(rootSkillMd)) {
       const rootSkillRealPath = resolveContainedSkillPath({
@@ -377,7 +374,7 @@ function loadSkillEntries(
 
     const loadedSkills: Skill[] = [];
 
-    // Only consider immediate subfolders that look like skills (have SKILL.md) and are under size cap.
+    // 仅处理一级子目录中“像技能目录”的项：包含 SKILL.md 且未超过大小限制。
     for (const name of limitedChildren) {
       const skillDir = path.join(baseDir, name);
       const skillDirRealPath = resolveContainedSkillPath({
@@ -488,7 +485,8 @@ function loadSkillEntries(
   });
 
   const merged = new Map<string, Skill>();
-  // Precedence: extra < bundled < managed < agents-skills-personal < agents-skills-project < workspace
+  // 合并优先级（后写覆盖前写）：
+  // extra < bundled < managed < agents-skills-personal < agents-skills-project < workspace
   for (const skill of extraSkills) {
     merged.set(skill.name, skill);
   }
@@ -514,7 +512,7 @@ function loadSkillEntries(
       const raw = fs.readFileSync(skill.filePath, "utf-8");
       frontmatter = parseFrontmatter(raw);
     } catch {
-      // ignore malformed skills
+      // 忽略 frontmatter 格式异常的技能，避免中断整体加载流程。
     }
     return {
       skill,
@@ -545,7 +543,7 @@ function applySkillsPromptLimits(params: { skills: Skill[]; config?: OpenClawCon
   };
 
   if (!fits(skillsForPrompt)) {
-    // Binary search the largest prefix that fits in the char budget.
+    // 通过二分查找找到“在字符预算内可容纳的最大前缀”。
     let lo = 0;
     let hi = skillsForPrompt.length;
     while (lo < hi) {
@@ -595,7 +593,7 @@ type WorkspaceSkillBuildOptions = {
   managedSkillsDir?: string;
   bundledSkillsDir?: string;
   entries?: SkillEntry[];
-  /** If provided, only include skills with these names */
+  /** 如果提供，仅包含这些名称对应的技能。 */
   skillFilter?: string[];
   eligibility?: SkillEligibilityContext;
 };
@@ -833,6 +831,7 @@ export function buildWorkspaceSkillCommandSpecs(
       if (!kindRaw) {
         return undefined;
       }
+      // 目前仅支持 tool 分发，其它值回退为默认行为（无分发配置）。
       if (kindRaw !== "tool") {
         return undefined;
       }
